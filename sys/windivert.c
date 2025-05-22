@@ -987,12 +987,12 @@ static const struct layer_s windivert_layer_flow_established_ipv6 =
  */
 static PVOID windivert_malloc(SIZE_T size, BOOL paged)
 {
-    POOL_TYPE pool = (paged? PagedPool: non_paged_pool);
+    POOL_TYPE pool = (paged ? POOL_FLAG_PAGED : POOL_FLAG_NON_PAGED);
     if (size == 0)
     {
         return NULL;
     }
-    return ExAllocatePoolWithTag(pool, size, WINDIVERT_TAG);
+    return ExAllocatePool2(pool, size, WINDIVERT_TAG);
 }
 static VOID windivert_free(PVOID ptr)
 {
@@ -2302,7 +2302,7 @@ static void windivert_read_service_request(context_t context, packet_t packet,
     PLIST_ENTRY entry;
     PMDL dst_mdl;
     UINT8 *layer_data, *src, *dst;
-    ULONG dst_len, src_len, copy_len, read_len = 0;
+    ULONG dst_len, src_len, copy_len = 0, read_len = 0;
     BOOL timeout;
     packet_t new_packet;
     req_context_t req_context;

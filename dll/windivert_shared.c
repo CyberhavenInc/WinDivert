@@ -122,7 +122,7 @@
 #define L____S_         WINDIVERT_LAYER_FLAG_SOCKET
 #define L_____R         WINDIVERT_LAYER_FLAG_REFLECT
 
-#if defined(WIN32) && defined(_MSC_VER)
+#if defined(WIN32) && defined(_MSC_VER) && !defined(ARM64)
 #pragma intrinsic(__emulu)
 static UINT64 WinDivertMul64(UINT64 a, UINT64 b)
 {
