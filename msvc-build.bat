@@ -32,19 +32,42 @@
 
 @echo off
 
+set WindowsSdkDir=C:\Program Files (x86)\Windows Kits\10\
+
+REM Create a self-signed certificate for driver signing (only if it doesn't exist)
+if not exist WinDivert.pfx (
+    echo Creating WinDivert certificate...
+    if exist WinDivert.cer del WinDivert.cer
+    if exist WinDivert.pvk del WinDivert.pvk
+    makecert -r -pe -ss PrivateCertStore -n "CN=WinDivert" -eku 1.3.6.1.5.5.7.3.3 WinDivert.cer -sv WinDivert.pvk
+    pvk2pfx -pvk WinDivert.pvk -spc WinDivert.cer -pfx WinDivert.pfx
+    echo Certificate created successfully.
+) else (
+    echo Using existing WinDivert certificate.
+)
+
+REM Compile message catalog to generate windivert_log.h
+pushd sys
+mc.exe -z "windivert_log" -h "." -r "." windivert_log.mc
+popd
+
 msbuild sys\windivert.vcxproj ^
     /p:Configuration=Release ^
     /p:platform=ARM64 ^
+    /p:WindowsTargetPlatformVersion=10.0.22621.0 ^
     /p:SignMode=Off ^
     /p:OutDir=..\install\MSVC\arm64\ ^
     /p:AssemblyName=WinDivert64
+signtool sign /f WinDivert.pfx /fd sha256 install\MSVC\arm64\WinDivert64.sys
 
 msbuild sys\windivert.vcxproj ^
     /p:Configuration=Release ^
     /p:platform=x64 ^
+    /p:WindowsTargetPlatformVersion=10.0.22621.0 ^
     /p:SignMode=Off ^
     /p:OutDir=..\install\MSVC\amd64\ ^
     /p:AssemblyName=WinDivert64
+signtool sign /f WinDivert.pfx /fd sha256 install\MSVC\amd64\WinDivert64.sys
 
 msbuild dll\windivert.vcxproj ^
     /p:Configuration=Release ^
