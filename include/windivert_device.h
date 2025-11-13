@@ -44,8 +44,8 @@
 #define WINDIVERT_KERNEL
 #include "windivert.h"
 
-#define WINDIVERT_VERSION_MAJOR                     3
-#define WINDIVERT_VERSION_MINOR                     0
+#define WINDIVERT_VERSION_MAJOR                     25
+#define WINDIVERT_VERSION_MINOR                     11
 
 #define WINDIVERT_MAGIC_DLL                         0x4C4C447669645724ull
 #define WINDIVERT_MAGIC_SYS                         0x5359537669645723ull
