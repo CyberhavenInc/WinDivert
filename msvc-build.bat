@@ -58,7 +58,7 @@ msbuild sys\windivert.vcxproj ^
     /p:SignMode=Off ^
     /p:OutDir=..\install\MSVC\arm64\ ^
     /p:AssemblyName=WinDivert64
-signtool sign /f WinDivert.pfx /fd sha256 install\MSVC\arm64\WinDivert64.sys
+REM signtool sign /f WinDivert.pfx /fd sha256 install\MSVC\arm64\WinDivert64.sys
 
 msbuild sys\windivert.vcxproj ^
     /p:Configuration=Release ^
@@ -67,7 +67,7 @@ msbuild sys\windivert.vcxproj ^
     /p:SignMode=Off ^
     /p:OutDir=..\install\MSVC\amd64\ ^
     /p:AssemblyName=WinDivert64
-signtool sign /f WinDivert.pfx /fd sha256 install\MSVC\amd64\WinDivert64.sys
+REM signtool sign /f WinDivert.pfx /fd sha256 install\MSVC\amd64\WinDivert64.sys
 
 msbuild dll\windivert.vcxproj ^
     /p:Configuration=Release ^
