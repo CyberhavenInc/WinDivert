@@ -1,0 +1,76 @@
+# Build outputs
+*/Release/
+*/Debug/
+*/x64/
+*/ARM64/
+**/Release/
+**/Debug/
+**/x64/
+**/ARM64/
+
+# MSBuild tracking logs (.tlog files and directories)
+*.tlog/
+**/*.tlog/
+*.tlog
+**/*.tlog
+
+# Object files and libraries
+*.obj
+*.pdb
+*.iobj
+*.ipdb
+*.ilk
+*.res
+*.exp
+*.lib
+*.dll
+*.sys
+
+# Build recipes and logs
+*.recipe
+*.vcxproj.FileListAbsolute.txt
+*.Build.CppClean.log
+*.lastbuildstate
+*unsuccessfulbuild
+unsuccessfulbuild
+
+# Certificate files - WinDivert.* files are committed for shared development
+# Allow WinDivert certificate files to be committed
+!WinDivert.pfx
+!WinDivert.pvk  
+!WinDivert.cer
+# Ignore other certificate files
+*.pfx
+*.pvk
+*.cer
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.db
+*.opendb
+
+# MSBuild logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# OS files
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Generated files
+sys/windivert_log.h
+sys/windivert_log.rc
+sys/*MSG*.bin
+sys/windivert_log_MSG*.bin
+
+# Install directory outputs (optional - uncomment if you don't want to track built binaries)
+install/MSVC/

@@ -323,15 +323,16 @@ static BOOLEAN WinDivertDriverInstall(VOID)
         goto WinDivertDriverInstallExit;
     }
 
-    // Check if the WinDivert service already exists; if so, start it.
-    service = OpenService(manager, WINDIVERT_DEVICE_NAME, SERVICE_ALL_ACCESS);
-    if (service != NULL)
+    // Get driver file:
+    if (!WinDivertGetDriverFileName(windivert_sys))
     {
         goto WinDivertDriverInstallExit;
     }
 
-    // Get driver file:
-    if (!WinDivertGetDriverFileName(windivert_sys))
+    // Check if the WinDivert service already exists; if so, try to use it.
+    // If it fails to start (e.g., driver file not found), we'll recreate it later.
+    service = OpenService(manager, WINDIVERT_DEVICE_NAME, SERVICE_ALL_ACCESS);
+    if (service != NULL)
     {
         goto WinDivertDriverInstallExit;
     }
@@ -363,7 +364,59 @@ WinDivertDriverInstallExit:
         success = StartService(service, 0, NULL);
         if (!success)
         {
-            success = (GetLastError() == ERROR_SERVICE_ALREADY_RUNNING);
+            DWORD start_error = GetLastError();
+            success = (start_error == ERROR_SERVICE_ALREADY_RUNNING);
+            
+            // If the service failed to start due to the driver file not being found
+            // or access issues, try to recreate the service with the current path
+            if (!success && (start_error == ERROR_FILE_NOT_FOUND || 
+                            start_error == ERROR_PATH_NOT_FOUND ||
+                            start_error == ERROR_ACCESS_DENIED))
+            {
+                SERVICE_STATUS status;
+                
+                // Stop the service if it's in a weird state
+                ControlService(service, SERVICE_CONTROL_STOP, &status);
+                
+                // Wait briefly for it to stop
+                for (int i = 0; i < 30; i++)
+                {
+                    if (QueryServiceStatus(service, &status) && 
+                        status.dwCurrentState == SERVICE_STOPPED)
+                    {
+                        break;
+                    }
+                    Sleep(100);
+                }
+                
+                // Delete the old service
+                if (DeleteService(service))
+                {
+                    CloseServiceHandle(service);
+                    service = NULL;
+                    
+                    // Try to create a new service with the current driver path
+                    service = CreateService(manager, WINDIVERT_DEVICE_NAME,
+                        WINDIVERT_DEVICE_NAME, SERVICE_ALL_ACCESS, SERVICE_KERNEL_DRIVER,
+                        SERVICE_DEMAND_START, SERVICE_ERROR_NORMAL, windivert_sys, NULL, NULL,
+                        NULL, NULL, NULL);
+                    
+                    if (service != NULL)
+                    {
+                        // Try to start the newly created service
+                        success = StartService(service, 0, NULL);
+                        if (!success)
+                        {
+                            success = (GetLastError() == ERROR_SERVICE_ALREADY_RUNNING);
+                        }
+                        else
+                        {
+                            // Mark for deletion on close
+                            (VOID)DeleteService(service);
+                        }
+                    }
+                }
+            }
         }
         else
         {
